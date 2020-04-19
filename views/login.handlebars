@@ -1,0 +1,16 @@
+<header class="toolbar toolbar-header">
+    <label class="title">&lt;OMG-Tools&gt;</label>
+</header>
+<section>
+<div id="icon">
+    <img class="icon" src="/image/icone.png">
+</div>
+<div class="inputs">
+    <input type="text" id="username" value="Username" onmouseover="user()" onmouseout="user(true)"><p></p>
+    <input type="text" id="password" value="Password" onmouseover="pass(this.type='password')" onmouseout="pass(true)"><p></p>
+</div>
+<div id="confirm">
+    <button id="submit" onclick="submit('/login')">Submit</button>
+</div>
+</section>
+<script src="../js/cadastro.js"></script>

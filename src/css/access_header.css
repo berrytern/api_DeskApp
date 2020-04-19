@@ -1,0 +1,12 @@
+*{margin: 0;padding: 0;box-sizing: border-box;outline: 0;}
+header{position: fixed; top: 0px; width: 100%; text-align: center; background: rgb(42, 49, 68);}
+label.title{font: normal 1.1em Arial; color: white;}
+
+
+@media (min-width: 1000px) and (min-height:1000px ){
+        header{font-size:1.2rem;}
+}
+@media(max-width: 277px){
+        label.title{margin-left: 0px;}
+        header{font-size:0.9rem;}
+}
