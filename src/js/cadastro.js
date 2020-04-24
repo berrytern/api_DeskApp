@@ -1,45 +1,48 @@
-function post(path, params, method='post') {
-    const form = document.createElement('form');
-    form.method = method;
-    form.action = path;
-  
-    for (const key in params) {
-      if (params.hasOwnProperty(key)) {
-        const hiddenField = document.createElement('input');
-        hiddenField.type = 'hidden';
-        hiddenField.name = key;
-        hiddenField.value = params[key];
-  
-        form.appendChild(hiddenField);
-      }
+document.querySelector('.inputimg').onchange = function(evt){
+    var tgt = evt.target || window.event.srcElement,
+        files = tgt.files;
+        console.log(files.length, files.name,)
+    // FileReader support
+    
+    if (FileReader && files && document.querySelector('.inputimg').files[0].size<=30000) {
+        var fr = new FileReader();
+        fr.onload = function () {
+            console.log(document.querySelector('.inputimg').value,document.querySelector('.inputimg').files[0])
+            document.querySelector('img.fileimg').src = fr.result;
+        }
+        fr.readAsDataURL(files[0]);
     }
-  
-    document.body.appendChild(form);
-    form.submit();
+
+    // Not supported
+    else {
+        document.querySelector('.inputimg').value=''
+        alert('tamanho ultrapassado')
+    }
 }
+var socket= io('http://localhost:9030');
+
 function submit(href){
     var username= document.getElementById("username").value
     var password= document.getElementById("password").value
-    if(href=='/login'){
+    var fileimg= document.querySelector('.inputimg').files
+    var boundary = (new Date()).getTime();
+    var blobFile = fileimg[0];
+    var formData = new FormData();
+    //formData.append("file", blobFile);
+    formData.append("username", username);
+    formData.append("password", password);
+    formData.append('file', fileimg[0], fileimg[0].name);
     var request=new XMLHttpRequest;
-    request.open("POST","http://localhost:8081"+href),request.setRequestHeader("Content-Type","application/json"),request.send('{"username":"'+username+'","password": "'+password+'"}');
+    request.open("POST","http://localhost:8082"+href ,true);
+    request.setRequestHeader("data",formData)
+    request.send(formData);
     request.onload=(e)=>{
-        if(JSON.parse(request.status)==200){ 
-            location.href=href 
-        }else{
-            alert('Usuário ou senha errados!');
-        }}
+    if(JSON.parse(request.status)==200){ 
+        alert('conta criada')
     }else{
-        var request=new XMLHttpRequest;
-        request.open("POST","http://localhost:8081"+href),request.setRequestHeader("Content-Type","application/json"),request.send('{"username":"'+username+'","password": "'+password+'"}');
-        request.onload=(e)=>{
-        if(JSON.parse(request.status)==200){ 
-            alert('conta criada')
-        }else{
-            alert('error ao fazer o cadastro');
-        }}
-        //post(href,{'username':username, 'password': password})
-    }
+        alert('error ao fazer o cadastro');
+    }}
+    
 
     //document.getElementById("user").innerText = username
 }

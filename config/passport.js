@@ -4,7 +4,7 @@ const passportJwt = require('passport-jwt')
 const { Strategy, ExtractJwt } = passportJwt
 const Conta = require("../models/Conta")
 
-module.exports = app => {
+module.exports = (req,res) => {
     console.log('dentro pass')
     //if(!req.body.token) res.send({'error': 'token faltando'})
     const params = {
@@ -19,7 +19,6 @@ module.exports = app => {
     })
 
     passport.use(strategy)
-
     return {
         authenticate: () => passport.authenticate('jwt', { session: false })
     }

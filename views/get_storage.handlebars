@@ -1,0 +1,45 @@
+<header class="toolbar toolbar-header">
+    <label class="title">&lt;OMG-Tools&gt;</label>
+</header>
+<div class="loading">
+    <img src="/image/loading.gif" alt="icone"/>
+</div>
+
+
+
+<script>
+function js(){
+    get= new XMLHttpRequest
+    get.open("GET",location.href,true)
+    get.setRequestHeader("Authorization","Bearer "+token)
+    get.setRequestHeader("Content-Type","text/html, application/xhtml+xml, application/xml; q=0.9, */*; q=0.8")
+    get.send()
+    get.onload=(e)=>{
+        var res =JSON.parse(get.responseText)
+        console.log(res, !!res.html, !res.js)
+        if(!res.html && !!res.js){
+            let algod =document.createElement('script')
+            algod.src= res.js
+            document.querySelector('body').appendChild(algod)} 
+        else if(!!res.html && !res.js){
+            document.querySelector('html').innerHTML =JSON.parse(get.responseText).html 
+        } 
+        else if(!res.html && !res.js){location.href ='/login'}
+        else{
+            let algod =document.createElement('script')
+            algod.src= res.js
+            document.querySelector('body').appendChild(algod)
+            document.querySelector('html').innerHTML =JSON.parse(get.responseText).html 
+            }
+        }
+    
+}
+var token=localStorage.getItem('token') || null
+console.log(token)
+if(!token){
+    alert('user not logged')
+    location.href= "/login"
+}
+else{js()}
+location.replace()
+</script>

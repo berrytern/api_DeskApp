@@ -7,7 +7,6 @@ const bodyParser = require('body-parser')
 //const Conta = require('./models/Post')
 const routes= require('./config/routes.js')
 const mongoose = require('mongoose')
-const _dirname = "C:\\Users\\berrytern\\Documents\\api_DeskApp\\"
 
 //Configurações
     // Body Parser
@@ -17,7 +16,7 @@ const _dirname = "C:\\Users\\berrytern\\Documents\\api_DeskApp\\"
         app.engine('handlebars', handlebars({defaultLayout: 'main'}))
         app.set('view engine', 'handlebars')
     // path
-        app.use(express.static(path.join(_dirname,"src")))
+        app.use(express.static(path.join(__dirname,"src")))
     // Mongoose
     mongoose.Promise = global.Promise;
     mongoose.connect("mongodb://localhost/api_to_all", { useNewUrlParser: true ,useUnifiedTopology: true}).then(()=>{
@@ -25,6 +24,7 @@ const _dirname = "C:\\Users\\berrytern\\Documents\\api_DeskApp\\"
     }).catch((err)=>{
         console.log(`cant connect to Mongoose, Error: ${err}`)
     })
+    // Session
     // Middleware
     app.use((req,res,next)=>{
         console.log('verificacao de acesso')
@@ -37,13 +37,21 @@ const _dirname = "C:\\Users\\berrytern\\Documents\\api_DeskApp\\"
         
     // Rotas
 consign()
-    .include('./config/passport.js')
     .then('./config/routes.js')
     .into(app)
 
+//socket.io
 
-
-//localhost:8082
+const server = require('http').createServer(app)
+const io = require('socket.io')(server)
+io.on('connection', socket=>{
+    console.log(socket.id)
+    socket.on('sendLogin',data=>{
+        console.log(data)
+    })
+})
+server.listen(9030)
+//localhost:808
 const Port = 8082
 app.listen(Port, ()=>{
     console.log(`Servidor rodando na url http://localhost:${Port}`)

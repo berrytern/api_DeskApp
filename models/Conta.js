@@ -14,12 +14,13 @@ const Conta = new Schema ({
         type: String,
         required: true
     },
-    nickname:{
+    icon:{
         type: String
     },
     email:{
         type: String,
     }
+
 })
 
 module.exports =mongoose.model('contas', Conta)

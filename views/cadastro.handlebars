@@ -5,12 +5,22 @@
 <div id="icon">
     <img class="icon" src="/image/icone.png">
 </div>
-<div class="inputs">
-    <input type="text" id="username" value="Username" onmouseover="user()" onmouseout="user(true)"><p></p>
-    <input type="text" id="password" value="Password" onmouseover="pass(this.type='password')" onmouseout="pass(true)"><p></p>
-</div>
-<div id="confirm">
-    <button id="submit" onclick="submit('/cadastro')">Submit</button>
+<div class="corpo">
+    <div class="entrada">
+        <div class="inputs">
+        <input type="text" id="username" value="Username" onmouseover="user()" onmouseout="user(true)"><p></p>
+        <input type="text" id="password" value="Password" onmouseover="pass(this.type='password')" onmouseout="pass(true)"><p></p>
+        </div>
+        <div class='file'>
+        <label for="img-upload"><img class="fileimg" src="/image/icone.png"></label>
+        <input id="img-upload" class="inputimg" type="file" accept=".png,.jpg, .jpeg"/>
+        </div>
+    </div>
+    <div id="confirm">
+        <button id="submit" onclick="submit('/cadastro')">Submit</button>
+    </div>
+
 </div>
 </section>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
 <script src="../js/cadastro.js"></script>
