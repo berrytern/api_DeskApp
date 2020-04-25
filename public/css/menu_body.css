@@ -1,6 +1,8 @@
+
 .page{
     display: flex;
     flex-direction: row;
+    background: rgb(42, 49, 68);
     margin-top:1.3em;
     height: calc(100vh - 1.3em);
 }
@@ -40,20 +42,66 @@
 .menu.top>img.main{
     filter: grayscale(98%) invert(100%);
 }
-.option{
+div.option{
     display: flex;
     flex-direction: column;
     background: rgb(5, 60, 82);
+    border-top-left-radius: 10px;
     width: 240px;
     height: 100%;
 }
+.opt-button{
+    margin: 10px 10px 10px 10px;
+    border-radius: 5px;
+    background: rgb(42, 49, 68);
+    color: rgb(170, 170, 178);
+    border: 0;
+}
+.option.center{
+    overflow-y:auto;
+}
+.option.center-content{
+    overflow-y:initial;
+    height: min-content;
+    width: 230px;
+}
+a.option{
+    display: flex;
+    flex-direction: row;
+    background: transparent;
+    border-radius: 5px;
+    margin-left: 9px;
+}
+a.option:hover{
+    background: rgb(6, 77, 122);
+    border-radius: 5px;
+
+}
+a.option-selected{
+    display: flex;
+    flex-direction: row;
+    background: rgb(6, 77, 105);
+    border-radius: 5px;
+    margin-left: 9px;
+}
+a label, a  img{
+    margin: 5px 5px;
+    color: white;
+}
+img.opt{
+    margin-right: 10px;
+    width: 35px;
+    height: 35px;
+    border-radius: 30px;
+}
+img.opt ~ label{
+    font: normal 15pt Arial;
+}
+
 .option.top{
     height: 50px;
     align-self: flex-start;
-}
-.option> button{
-    background: transparent;
-    border-color: red;
+    border-bottom: 1px solid black;
 }
 .option.top>button, .option.bottom>button{
     height: 100%;

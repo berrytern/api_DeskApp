@@ -19,7 +19,6 @@ document.querySelector('.inputimg').onchange = function(evt){
         alert('tamanho ultrapassado')
     }
 }
-var socket= io('http://localhost:9030');
 
 function submit(href){
     var username= document.getElementById("username").value

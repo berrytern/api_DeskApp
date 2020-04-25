@@ -1,4 +1,3 @@
-
 a{
     text-decoration: none;
     color: white;
@@ -15,6 +14,7 @@ section{
     border-radius: 10px;
 }
 div#icon{
+    margin-bottom: 30px;
     text-align: center;
 }
 @media(min-width: 1000px) and (min-height:1000px ){

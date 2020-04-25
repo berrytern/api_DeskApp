@@ -25,7 +25,7 @@ function auth(req,res,next){
     return (req,res,next)=>{
         console.log('on auth')
         header_token=req.header('Authorization') || null
-        if(!header_token) {console.log('sem header');res.render('get_storage',{header_s:'../css/access_header.css',body_s:'../css/loading.css'})}
+        if(!header_token) {console.log('sem header');res.sendFile(__dirname.replace("config", '')+'src/html/get_storage.html')}
         else{
         token = req.header('Authorization').split(' ')[1] || null
         if(!token){console.log('sem token');res.redirect('/login')}

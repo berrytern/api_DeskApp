@@ -1,33 +1,51 @@
 const express = require('express')
 const Conta = require("../models/Conta")
 const Pedidos = require('../models/Pedidos')
+const Friends = require('../models/Friends')
 const {admin} = require('./admin')
 const {return_token} = require("./auth")
 const {auth} = require("./auth")
-const  fileUpload = require('express-fileupload')
+const fileUpload = require('express-fileupload')
 const bcrypt = require('bcrypt-nodejs')
+const jwt = require('jwt-simple')
+const { authSecret } = require('../.env')
 
 module.exports = app=>{
     app.use('/menu', auth())   
     app.use('/icon', auth()) 
     app.use('/admin', auth())
-    app.use('/validate', auth())
+    app.use('/friends', auth())
     app.use('/friends/new', auth())
+    app.use('/pedidos', auth())
+    app.use('/pedido/new', auth())
 
     app.use('/admin', admin())  
 
     app.use(fileUpload({
         limits: { fileSize: 20024 },
       }));
-    app.get('/validate', (req,res)=>{
-        let timetk = req.user.exp -(Date.now()/1000)
-        if(timetk>=1){
-            res.json({'valid':true,'timeleft':timetk / 60})
-        }
-        else{res.json({'valid':false,'timeleft':null})}
+    app.post('/validate', (req,res)=>{
+        console.log('/validate')
+        token = req.body.token || null
+        try{
+            if(!!token){
+                user=jwt.decode(token, authSecret)
+                let timetk = user.exp -(Date.now()/1000)
+                if(timetk>=1){
+                    Conta.findOne({username: user.name}).then((e)=>{
+                        console.log(JSON.stringify(e))
+                        if(JSON.stringify(e)!='null'){
+                            res.json({'valid':true,'token':return_token(e).token})
+                            
+                        }
+                        else{res.json({'valid':false,'token':null})}
+                    })
+                }else{res.json({'valid':false,'token':null})}
+            }else{res.json({'valid':false,'token':null})}
+        }catch{res.json({'valid':false,'token':null})}
     })
     app.get("/cadastro", (req, res)=>{
-        res.render("cadastro",{header_s:'../css/access_header.css',body_s:'../css/cadastro_body.css'})
+        res.sendFile(__dirname.replace("config", '')+'src/html/cadastro.html')
     })
     app.post('/cadastro',async (req, res)=>{
         console.log("/cadastro")
@@ -70,7 +88,7 @@ module.exports = app=>{
         })
     })
     app.get("/login", (req, res)=>{
-        res.render("login",{header_s:'../css/access_header.css',body_s:'../css/access_body.css'})
+        res.sendFile(__dirname.replace("config", '')+'src/html/login.html')
     });
     app.post('/login',(req, res)=>{
         console.log("/login --POST")
@@ -93,18 +111,102 @@ module.exports = app=>{
     })
 
     app.get('/menu',(req, res)=>{
-            console.log('/ get')
-            if(!req.header) res.send('need auth')
-            res.render('principal',{header_s:'../css/access_header.css', body_s:'../css/principal_body.css'})
+        var fs =require('fs')
+        fs.readFile('src/html/menu.html',(err,data)=>{
+            res.json({'html':String(data),'js':'../js/menu.js'})
+        })
         })
     app.get('/icon',(req,res)=>{
-        console.log('/icon')
-        res.render('principal',{header_s:'../css/access_header.css',body_s:'../css/principal_body.css'})
+        //
         })
     
-
-    app.get('/friends',(req,res)=>{})
+    app.post('/friends', (req,res)=>{
+    
+        Friends.findOne({id:req.user._id},(err,doc)=>{
+            if(!!doc){
+                if(doc.who.length>0){
+                    res.json({'exist': true, 'list':doc.who})
+                }
+                else{
+                    res.json({'exist': false})
+                }
+            }else{
+                res.json({'exist': false})
+            }
+            })
+        })
     app.post('/friends/new',(req,res)=>{
+        let remove=function(from, to){
+            Pedidos.findOne({id:to}, (err,ped)=>{
+                if(!!ped){
+                    for( var i = 0; i < ped.who.length; i++){ 
+                        console.log(ped.who[i])
+                        if ( ped.who[i] === from) {
+                            ped.who.splice(i, 1); 
+                            ped.save((erre)=>{console.log(erre)})
+                        }}
+                }
+                Pedidos.findOne({id:from}, (err,ped)=>{
+                    if(!!ped){
+                        for( var i = 0; i < ped.who.length; i++){ 
+                            console.log(ped.who[i])
+                            if ( ped.who[i] === to) {
+                                ped.who.splice(i, 1); 
+                                ped.save((erre)=>{console.log(erre)})
+                            }}
+                    }})
+        })}
+        let add= (from, to)=>{
+            Friends.findOne({id:to},(err,doc)=>{
+                if(!!doc){
+                    var already = false
+                    console.log('doc.who: ',doc.who)
+                    for(id in doc.who){
+                        console.log('id: ',id,', value: ',doc.who[id])
+                        if(doc.who[id] ==from){
+                            console.log('id:',doc.who[id],'==',from)
+                            already= true
+                        }
+                    }
+                    if(already){
+                    }
+                    else{
+                        doc.who= doc.who.concat(from)
+                        doc.save((erre)=>{console.log(erre)})
+                    }
+                }else{console.log('err: ',err)
+                new Friends({
+                    id: to,
+                    who: from
+                }).save().then(()=>{res.send({'done':true,'already':false})}).catch((err)=>{
+                    res.send(err.message)
+                })}}
+            
+
+            
+            )}
+            add(req.user._id, req.body.to)
+            add(req.body.to, req.user._id)
+            remove(req.user._id,req.body.to)
+            res.send('done')
+
+        })
+    app.post('/pedidos', (req,res)=>{
+        
+        Pedidos.findOne({id:req.user._id},(err,doc)=>{
+            if(!!doc){
+                if(doc.who.length>0){
+                    res.json({'exist': true, 'list':doc.who})
+                }
+                else{
+                    res.json({'exist': false})
+                }
+            }else{
+                res.json({'exist': false})
+            }
+            })
+        })
+    app.post('/pedido/new',(req,res)=>{
 
         Pedidos.findOne({id:req.body.to},(err,doc)=>{
             
@@ -134,7 +236,7 @@ module.exports = app=>{
         
         })
 
-    })
+        })
     app.get('/conversa',admin((req, res)=>{
         var fs  = require('fs')
 

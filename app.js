@@ -16,7 +16,7 @@ const mongoose = require('mongoose')
         app.engine('handlebars', handlebars({defaultLayout: 'main'}))
         app.set('view engine', 'handlebars')
     // path
-        app.use(express.static(path.join(__dirname,"src")))
+        app.use(express.static(path.join(__dirname,"public")))
     // Mongoose
     mongoose.Promise = global.Promise;
     mongoose.connect("mongodb://localhost/api_to_all", { useNewUrlParser: true ,useUnifiedTopology: true}).then(()=>{
