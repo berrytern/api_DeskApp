@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./css/start.css">
+    <title>Document</title>
+</head>
+<body>
+    <nav>
+    <a href="./html/login.html">login</a>
+    </nav>
+</body>
+</html>
+<script>
+var token=localStorage.getItem('token') || null
+if(!token){
+    alert('user not logged')
+    location.href= "./html/login.html"
+}
+else{
+    validate= new XMLHttpRequest
+    validate.open("POST",location.protocol+"//"+location.hostname+':'+ location.port+'/validate')
+    validate.setRequestHeader("Content-Type","application/json")
+    validate.send('{"token":"'+token+'"}')
+    validate.onload=(e)=>{
+        console.log(validate.responseText)
+        token = JSON.parse(validate.responseText).token
+    
+        if(token==null){
+            location.href="./html/login.html"}
+        else{
+            location.href="./html/menu.html"
+        }
+    }
+}
+</script>

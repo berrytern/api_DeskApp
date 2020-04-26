@@ -1,6 +1,3 @@
-
-var socket= io('http://localhost:9030');
-
 function submit(href){
     var username= document.getElementById("username").value
     var password= document.getElementById("password").value
@@ -8,10 +5,10 @@ function submit(href){
     request.open("POST","http://localhost:8082"+href),request.setRequestHeader("Content-Type","application/json"),request.send('{"username":"'+username+'","password": "'+password+'"}');
     request.onload=(e)=>{
         console.log(request.responseText)
-        if(JSON.parse(request.status)==200){ 
+        if(JSON.parse(request.status)==200){
             let token =JSON.parse(request.responseText)['token']
             window.localStorage.setItem('token',token)
-            location.href="/menu"
+            location.href="./menu.html"
             //document.querySelector('html').innerHTML=get.responseText
         }else{
             alert('Usuário ou senha errados!');

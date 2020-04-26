@@ -13,8 +13,10 @@ function seach(){
         else{document.querySelector('body').removeChild(fundo)}
     }
     let btn = document.createElement('button')
-    btn.style.width = "300px"
-    btn.style.height = '300px'
+    btn.style.width = "550px"
+    btn.style.height = '340px'
+    btn.style.border = 0
+    btn.style.borderRadius = '10px'
     btn.style.zIndex = 1
     btn.style.marginTop = 'calc(50vh - 150px)'
     btn.style.marginLeft = 'calc(50vw - 150px)'
@@ -51,7 +53,7 @@ for(let i=0;i<19;i++){
 }
 window.addEventListener('load', (event) => {
     var request=new XMLHttpRequest;
-    request.open("GET","http://localhost:8081/conversa"),request.setRequestHeader("Content-Type","application/json"),request.send('{"username":"'+'username'+'","password": "'+'password'+'"}');
+    request.open("GET","http://localhost:8082/conversa"),request.setRequestHeader("Content-Type","application/json"),request.send('{"username":"'+'username'+'","password": "'+'password'+'"}');
     request.onload=(e)=>{
         let data= 'data:image/jpeg;base64,'
         let last = document.createElement('img')

@@ -1,0 +1,13 @@
+*{margin: 0;padding: 0;box-sizing: border-box;outline: 0;}
+nav{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    background: rgb(42, 49, 68);
+}
+nav a{
+    margin: 10px 20px;
+    text-decoration: none;
+    text-align: end;
+    color: white;
+}

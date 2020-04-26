@@ -35,7 +35,7 @@ function att_users(users){
 function post(rota){
     console.log('clicked')
     request = new XMLHttpRequest
-    request.open("POST",location.href+rota, true)
+    request.open("POST",'http://localhost:8082/admin'+rota, true)
     request.setRequestHeader("Content-Type","application/json")
     request.setRequestHeader("Authorization","Bearer "+localStorage.getItem('token'))
     request.send()
