@@ -134,10 +134,46 @@ img.opt ~ label{
     width: 100%;
     
 }
-.navl{
+div.navl{
     display: flex;
     flex-direction: row;
+    position: fixed;
     width: 100%;
+}
+a.navl.init img{
+    width: 20px;
+    height: 20px;
+}  
+a.navl{
+    display: flex;
+    margin: 10px 5px 10px 5px;
+    padding: 0px 5px 0px 5px;
+    border-radius: 5px;
+    font: normal 11pt Arial;
+    white-space: nowrap;
+    align-items: center;
+}
+a.navl.n{
+    cursor:pointer;
+    color: rgb(190, 190, 190);
+    background: transparent;
+}
+a.navl.n:hover{
+    color: white;
+    background: rgba(190, 190, 190,0.2);
+}
+ 
+a.navl.add{
+    cursor:pointer;
+    color: white;
+    background: rgb(67,181,129);
+}
+
+.navr{
+    display: flex;
+    flex-direction: row-reverse;
+    width: 100%;
+    
 }
 .somecounts{
     display: flex;
@@ -153,12 +189,35 @@ img.opt ~ label{
     flex-shrink: 5;
     flex-grow: 1;
 }
-.content.hiddable{
+.message .f.lbl{
+    margin: 5px 0px 10px 5px;
+}
+.message .f.div{
     display: flex;
+    justify-content: flex-end;
+    margin: 0px 10px;
+    padding: 5px 0px 5px 5px;
+}
+.f.div button{
+    width: 30px;
+    height: 30px;
+    background: rgb(47, 49, 54);
+    border-radius: 30px;
+    border:  0;
+    margin-right: 10px;
+}
+.content.hiddable{
+    display: none;
     flex-direction: column;
     width: 240px;
     flex-shrink: 0;
     background-color: rgb(5, 60, 82);
+}
+.content-hlbl{
+    margin: 10px 0px 0px 10px;
+    color: rgb(170, 170, 178);
+    font: normal 9pt Arial;
+    text-transform: uppercase;
 }
 .content.bottom{
     display: flex;
@@ -169,12 +228,19 @@ img.opt ~ label{
 }
 .message{
     display: flex;
-    flex-direction: column-reverse;
-    flex: 1 1;
+    flex-direction: column;
+    flex: 1 2;
     height: 100%;
     width: 100%;
 }
 @media(min-width: 1000px) and (min-height:1000px ){
     section{margin-top:1.4rem;height: calc(100vh - 1.5em);}
     .menu{height: calc(100%-24px);}
+}
+@media(max-width: 800px){
+    .navr button{display: none;}
+}
+@media(min-width: 800px){
+    .content.hiddable{
+        display: flex;}
 }

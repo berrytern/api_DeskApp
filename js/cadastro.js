@@ -38,6 +38,7 @@ function submit(href){
     request.onload=(e)=>{
     if(JSON.parse(request.status)==200){ 
         alert('conta criada')
+        location.href='./login.html'
     }else{
         alert('error ao fazer o cadastro');
     }}

@@ -7,6 +7,5 @@ label.title{font: normal 1.1em Arial; color: white;}
         header{font-size:1.2rem;}
 }
 @media(max-width: 277px){
-        label.title{margin-left: 0px;}
         header{font-size:0.9rem;}
 }

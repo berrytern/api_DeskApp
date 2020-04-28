@@ -1,5 +1,4 @@
-
-//console.log(document.querySelector('section').removeChild())
+if(!admin){location.href='./login.html'}
 function att_users(users){
     for(user in users){
         console.log('user: ',user, users[user]) 
