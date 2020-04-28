@@ -15,7 +15,7 @@ const Conta = new Schema ({
         required: true
     },
     icon:{
-        type: String
+        type: Buffer
     },
     email:{
         type: String,

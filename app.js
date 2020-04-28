@@ -1,4 +1,5 @@
 const express = require('express')
+var cors = require('cors')
 var app =express()
 const consign = require('consign')
 const path =require('path')
@@ -8,7 +9,21 @@ const bodyParser = require('body-parser')
 const routes= require('./config/routes.js')
 const mongoose = require('mongoose')
 
+var whitelist = ['https://berrytern.github.io', 'file:']
+var corsOptionsDelegate = function (req, callback) {
+  var corsOptions;
+  if (whitelist.indexOf(req.header('Origin')) !== -1) {
+    corsOptions = { origin: true } // reflect (enable) the requested origin in the CORS response
+  } else {
+    console.log(req.header('Origin'))
+    corsOptions = { origin: true } // disable CORS for this request
+  }
+  callback(null, corsOptions) // callback expects two parameters: error and options
+}
+ 
 //Configurações
+    // cors
+    app.use(cors(corsOptionsDelegate))
     // Body Parser
         app.use(bodyParser.urlencoded({extended: false}))
         app.use(bodyParser.json())
