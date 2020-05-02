@@ -1,5 +1,6 @@
 const express = require('express')
 const Conta = require("../models/Conta")
+const Online = require('../models/Online')
 const Pedidos = require('../models/Pedidos')
 const Friends = require('../models/Friends')
 const {admin} = require('./admin')
@@ -56,6 +57,10 @@ module.exports = app=>{
     app.use('/pedidos', auth())
     app.use('/pedido/new', auth())
     app.use('/pedido/delete', auth())
+    app.use('/bloqueados', auth())
+    app.use('/bloqueado/new', auth())
+    app.use('/bloqueado/delete', auth())
+    app.use('/status', auth())
 
     app.use('/admin', admin())  
 
@@ -71,19 +76,19 @@ module.exports = app=>{
         if(!!token){
             try{user=jwt.decode(token, authSecret)}
             catch (e){user=null}
-            if(!user){res.json({'valid':false,'token':null, 'admin':0})}
+            if(!user){res.json({'valid':false,'token':null, 'admin':0, 'icon':null, 'username':null})}
             else{let timetk = user.exp -(Date.now()/1000)
                 if(timetk>=1){
-                    Conta.findOne({username: user.name}).then((e)=>{
-                        if(JSON.stringify(e)!='null'){
-                            res.json({'valid':true,'token':return_token(e).token, 'admin':user.eAdmin})
-                            
+                    Conta.findOne({username: user.name}, (e,doc)=>{
+                        if(e==null){
+                            res.json({'valid':true,'token':return_token(doc).token, 'admin':user.eAdmin, 'icon':doc.icon.toString('base64'), 'username':user.name})
+
                         }
-                        else{res.json({'valid':false,'token':null, 'admin':0})}
+                        else{res.json({'valid':false,'token':null})}
                     })
-                }else{res.json({'valid':false,'token':null, 'admin':0})}
+                }else{res.json({'valid':false,'token':null})}
             }
-        }else{res.json({'valid':false,'token':null, 'admin':0})}
+        }else{res.json({'valid':false})}
     })
     app.post('/cadastro',async (req, res)=>{
         console.log("/cadastro")
@@ -128,11 +133,27 @@ module.exports = app=>{
         if (!username || !password) return res.status(406).send({Error: "missing information!"});
         console.log("username: "+req.body.username+" password: " +req.body.password)
 
-        Conta.findOne({username: username}).then((e)=>{
-            if(JSON.stringify(e)!='null'){
-                if(bcrypt.compareSync(password, e.password)){
+        Conta.findOne({username: username},(err,doc)=>{
+            if(err==null){
+                if(bcrypt.compareSync(password, doc.password)){
                     console.log('logado')
-                    res.json(return_token(e))
+                    doc.status = 'online'
+                    doc.save()
+                    Online.findOne({id:doc.id},(e,resp)=>{
+                        if(e){res.status(500).send();console.log(e)}
+                        else if(!resp){ 
+                            console.log('nao existe')
+                            new Online({
+                                id: doc.id,
+                                time: (Date.now()/1000) + (60 * 30 * 1)
+                            }).save()
+                        }else{
+                            console.log('existe',resp)
+                            resp.time = (Date.now()/1000)+(60 * 30 * 1)
+                            resp.save()
+                        }
+                    })
+                    res.json(return_token(doc))
                 }else res.status(400).send({'message':'senha inválida'})
             }else{
                 res.status(404).send({'exists': false,'response':"user or password incorrect!"})
@@ -274,6 +295,22 @@ module.exports = app=>{
         console.log('/pedido/delete')
         remove_pedidos(req.user._id,req.body.to)
         res.status(200).send()
+    })
+    app.post('/bloqueados',(req,res)=>{})
+    app.post('/bloqueado/new',(req,res)=>{})
+    app.post('/bloqueado/delete',(req,res)=>{})
+    app.post('/status',(req,res)=>{
+        let statuslist = ['online','offline', 'busy','away']
+        let exist = false
+        Conta.findOne({id: req.user._id},(err,doc)=>{
+            if(err){res.status(500).send({'error':'server error'})}
+            else{
+                if(statuslist.indexOf(req.body.status)!=-1){
+                    doc.status = req.body.status
+                    doc.save() 
+                }else{res.status(314).send({'err': 'status inválido'})}
+            }
+        })
     })
     app.get('/conversa',(req, res)=>{
         console.log('/conversa')

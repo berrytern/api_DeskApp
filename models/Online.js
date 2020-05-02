@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
-const Pedidos = new Schema ({
+const Online = new Schema ({
     id:{
         type: String,
         required:true,
@@ -9,9 +9,9 @@ const Pedidos = new Schema ({
         dropDumps: true
 
     },
-    who:{
-        type: Array,
+    time:{
+        type: Number,
         required: true
     }
 })
-module.exports= mongoose.model('pedidos', Pedidos)
+module.exports= mongoose.model('online', Online)

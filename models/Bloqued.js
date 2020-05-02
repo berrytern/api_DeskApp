@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
-const Pedidos = new Schema ({
+const Bloqued = new Schema ({
     id:{
         type: String,
         required:true,
@@ -14,4 +14,4 @@ const Pedidos = new Schema ({
         required: true
     }
 })
-module.exports= mongoose.model('pedidos', Pedidos)
+module.exports= mongoose.model('bloqueados', Bloqued)

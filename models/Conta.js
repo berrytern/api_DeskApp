@@ -19,8 +19,11 @@ const Conta = new Schema ({
     },
     email:{
         type: String,
+    },
+    status:{
+        type: String,
+        default: 'offline'
     }
-
 })
 
 module.exports =mongoose.model('contas', Conta)

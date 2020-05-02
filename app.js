@@ -8,6 +8,7 @@ const bodyParser = require('body-parser')
 //const Conta = require('./models/Post')
 const routes= require('./config/routes.js')
 const mongoose = require('mongoose')
+const {setoff} = require('./config/setoffline')
 
 var whitelist = ['https://berrytern.github.io', 'file:']
 var corsOptionsDelegate = function (req, callback) {
@@ -56,6 +57,7 @@ consign()
     .into(app)
 
 //socket.io
+setInterval(setoff, 1000)
 
 const server = require('http').createServer(app)
 const io = require('socket.io')(server)
@@ -65,6 +67,7 @@ io.on('connection', socket=>{
         console.log(data)
     })
 })
+
 server.listen(9030)
 //localhost:808
 const Port = 8082
