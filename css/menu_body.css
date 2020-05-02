@@ -1,4 +1,3 @@
-
 .page{
     display: flex;
     flex-direction: row;
@@ -107,9 +106,173 @@ img.opt ~ label{
     height: 100%;
 }
 .option.bottom{
-    background: rgb(5, 60, 82);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background: rgb(12, 45, 70);
     height: 50px;
     align-self: flex-end;
+    flex-wrap: nowrap;
+}
+.option.bottom>img{
+    position: relative;
+    width : 32px;
+    height : 32px;
+    border-radius : 20px;
+    margin-left : 5px;
+    cursor : pointer;
+}
+.option.bottom img.status{
+    background-color: green;
+    position: absolute;
+    width : 15px;
+    height : 15px;
+    border: solid 2.5px rgb(12, 45, 70);
+    border-radius : 20px;
+    margin-left : 23px;
+    margin-top: 12px;
+}
+.option.bottom label{
+    font: normal 12pt Arial;
+    color: white;
+    margin-left: 5px;
+}
+.option.bottom div{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    flex: 1 1;
+    margin-right: 10px;
+}
+.option.bottom div button{
+    align-content:flex-end;
+    width: 25px;
+    height: 25px;
+    background: transparent;
+    border: 0;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.option.bottom div button img{
+    width: 15px;
+    height: 15px;
+
+}
+.user-config{
+    display: none;
+    flex-direction: row;
+    position: absolute;
+    z-index: 1;
+    width: 100vw;
+    height: 100vh;
+    background: rgb(6, 77, 105);
+}
+.user-options{
+    width: 220px;
+    background: rgb(22, 55, 80);
+}
+.user-content{
+    flex: 1 1;
+}
+.user-close{
+    width: 50px;
+}
+.user-close button{
+    margin-top: 50px;
+    margin-left: 1px;
+    width: 35px;
+    height: 35px;
+    background: transparent;
+    border: solid 2px white;
+    border-radius: 20px;
+}
+.user-close button:hover{
+    background: rgba(180, 180, 180,0.4);
+    cursor: pointer;
+}
+@media (min-width:900px){
+    .user-options{
+        width: calc(70vw - 410px);
+    }
+    .user-close{
+        margin-right: calc(20vw - 180px);
+    }
+}
+@media (min-width:1200px){
+    .user-options{
+        width: calc(40vw - 40px);
+    }.user-close{
+        margin-right: calc(40vw - 420px);
+    }
+}
+.set-status{
+    display: none;
+    position: absolute;
+    width: 220px;
+    height: 247px;
+    margin-left: 82px;
+    margin-top: calc(100vh - 317px);
+    border-radius: 5px;
+    background: rgb(12, 45, 70);
+}
+.set-status div{
+    display: flex;
+    flex-direction: column;
+    margin: 8px 8px;
+}
+.set-status button img{
+    margin-left: 10px;
+    margin-right: 15px;
+    background-color: transparent;
+    width: 10px;
+    height: 10px;
+
+}
+.set-status .carinha{
+    margin-left: 8px;
+    margin-right: 13px;
+    background-color: transparent;
+    width: 14px;
+    height: 14px;
+}
+.set-status button{
+    text-align: left;
+    font: normal 10pt Arial;
+    color: rgb(180, 180, 180);
+    background: transparent;
+    margin-top: 2px;
+    border: 0;
+    border-radius: 3px;
+}
+.set-status button:hover{
+    background: rgb(22, 55, 80);
+    cursor: pointer;
+}
+.set-status button.no{
+    height: 30px;
+}
+.set-status div button.yes{
+    border-top: solid 8px transparent;
+}
+.set-status label{
+    cursor: pointer;
+    height: 20px;
+    width: 60px;
+}
+.set-status label.min{
+    white-space: normal;
+    height: max-content;
+    width: 150px;
+    font: bold  7pt Arial;
+    color: rgb(120, 120, 120);
+}
+.set-status .ce{
+    margin: 4px 35px 7px 35px;
+}
+.set-status .div{
+    border-top: solid 1px rgb(6, 77, 122);
+    margin: 2px 0px 0px 0px;
+
 }
 .content{
     display: flex;
@@ -132,7 +295,6 @@ img.opt ~ label{
     display: flex;
     flex-direction: row-reverse;
     width: 100%;
-    
 }
 div.navl{
     display: flex;
