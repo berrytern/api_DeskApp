@@ -1,6 +1,7 @@
 const { authSecret } = require('../.env')
 const jwt = require('jwt-simple')
 const bcrypt = require('bcrypt-nodejs')
+const Online = require('../models/Online')
 
 function return_token(user){
     
@@ -27,9 +28,17 @@ function auth(req,res,next){
         token = req.header('Authorization').split(' ')[1] || null
         if(!token){console.log('sem token');res.redirect('/login')}
         else{
+            
             req.user=jwt.decode(token, authSecret)
-            console.log('passed')
-            next()}
+            Online.findOne({id:req.user._id},(err,doc)=>{
+                console.log('auth online: ', err, doc)
+                if(!doc){res.status(401).send()}
+                else{
+                    console.log('passed')
+                    next()
+                }
+            })
+            }
         }
     }
 }

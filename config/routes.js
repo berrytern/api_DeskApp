@@ -51,6 +51,10 @@ module.exports = app=>{
     app.use('/menu', auth())   
     app.use('/icon', auth()) 
     app.use('/admin', auth())
+    app.use('/validate', auth())
+    app.use('/change/username', auth())
+    app.use('/change/icon', auth())
+    app.use('/change/password', auth())
     app.use('/friends', auth())
     app.use('/friend/new', auth())
     app.use('/friend/delete', auth())
@@ -61,6 +65,7 @@ module.exports = app=>{
     app.use('/bloqueado/new', auth())
     app.use('/bloqueado/delete', auth())
     app.use('/status', auth())
+    app.use('/logout',auth())
 
     app.use('/admin', admin())  
 
@@ -68,20 +73,31 @@ module.exports = app=>{
     //    res.redirect('http://berrytern.github.io/api_DeskApp/')
     //})
     app.use(fileUpload({
-        limits: { fileSize: 20024 },
+        limits: { fileSize: 40024 },
       }));
     app.post('/validate', (req,res)=>{
         console.log('/validate')
-        token = req.body.token || null
+        token = req.header('Authorization').split(' ')[1] || null
         if(!!token){
             try{user=jwt.decode(token, authSecret)}
             catch (e){user=null}
             if(!user){res.json({'valid':false,'token':null, 'admin':0, 'icon':null, 'username':null})}
             else{let timetk = user.exp -(Date.now()/1000)
                 if(timetk>=1){
-                    Conta.findOne({username: user.name}, (e,doc)=>{
+                    Conta.findOne({_id: user._id}, (e,doc)=>{
+                        console.log('user._id',user, 'doc._id',doc)
                         if(e==null){
-                            res.json({'valid':true,'token':return_token(doc).token, 'admin':user.eAdmin, 'icon':doc.icon.toString('base64'), 'username':user.name})
+                            Online.findOne({id:doc._id},(e,resp)=>{
+                                if(e){res.status(500).send();console.log(e)}
+                                else if(!resp){ 
+                                    res.status(401).send()
+                                }else{
+                                    resp.time = (Date.now()/1000)+(60 * 30 * 1)
+                                    resp.save()
+                                    res.json({'valid':true,'token':return_token(doc).token, 'admin':user.eAdmin, 'icon':doc.icon.toString('base64'), 'username':doc.username,'status':doc.status,'email':doc.email})
+                                }
+                            })
+                            
 
                         }
                         else{res.json({'valid':false,'token':null})}
@@ -134,11 +150,9 @@ module.exports = app=>{
         console.log("username: "+req.body.username+" password: " +req.body.password)
 
         Conta.findOne({username: username},(err,doc)=>{
-            if(err==null){
+            if(!!doc){
                 if(bcrypt.compareSync(password, doc.password)){
                     console.log('logado')
-                    doc.status = 'online'
-                    doc.save()
                     Online.findOne({id:doc.id},(e,resp)=>{
                         if(e){res.status(500).send();console.log(e)}
                         else if(!resp){ 
@@ -155,12 +169,17 @@ module.exports = app=>{
                     })
                     res.json(return_token(doc))
                 }else res.status(400).send({'message':'senha inválida'})
-            }else{
-                res.status(404).send({'exists': false,'response':"user or password incorrect!"})
-            }
+            }else{res.status(404).send({'exists': false,'response':"user or password incorrect!"})}
         }).catch(()=>{ res.send(500,{'exists': false,'response':'dont work!'})
         })
 
+    })
+    app.post('/logout',(req,res)=>{
+        console.log('/logout')
+        Online.findOneAndDelete({id:req.user._id},(err,doc)=>{
+            console.log(err)
+            if(!err){res.status(200).send('loggout')}
+        })
     })
     app.post('/friends', (req,res)=>{
         console.log('/friends')
@@ -300,15 +319,67 @@ module.exports = app=>{
     app.post('/bloqueado/new',(req,res)=>{})
     app.post('/bloqueado/delete',(req,res)=>{})
     app.post('/status',(req,res)=>{
+        console.log('/status',req.body.status,req.user._id)
         let statuslist = ['online','offline', 'busy','away']
         let exist = false
-        Conta.findOne({id: req.user._id},(err,doc)=>{
-            if(err){res.status(500).send({'error':'server error'})}
+        Conta.findOne({_id: req.user._id},(err,doc)=>{
+            if(err){res.status(500).json({'error':'server error'})}
             else{
                 if(statuslist.indexOf(req.body.status)!=-1){
                     doc.status = req.body.status
                     doc.save() 
+                    res.status(200).json({'done': req.body.status})
                 }else{res.status(314).send({'err': 'status inválido'})}
+            }
+        })
+    })
+    app.post('/change/username',(req, res)=>{
+        console.log('/change/username')
+        Conta.findOne({_id:req.user._id},(err,doc)=>{
+            if(err){res.status(404).send()}
+            else{
+                if(bcrypt.compareSync(req.body.password, doc.password)){
+                    doc.username = req.body.username
+                    doc.save()
+                    res.status(201).send()
+                }else{res.status(401).send()}
+            }
+        })
+    })
+    app.post('/change/icon',(req,res)=>{
+        console.log('/change/icon')
+        Conta.findOne({_id:req.user._id},(err,doc)=>{
+            if(err){res.status(404).send()}
+            else{
+                if(bcrypt.compareSync(req.body.password, doc.password)){
+                    if (!req.files || Object.keys(req.files).length === 0) {
+                        res.status(400).send('No files were uploaded.');
+                        return;
+                    }
+                    else if(req.files.file.truncated){
+                        res.status(413).send({'err':'file is over the size limit'})
+                    }
+                    else{
+                        var usepath=req.files.file.data
+                    }
+                    doc.icon = usepath  
+                    doc.save()
+                    res.status(201).send()
+                }else{res.status(401).send()}
+            }
+        })
+    })
+    app.post('/change/password',(req,res)=>{
+        console.log('/change/password')
+        Conta.findOne({_id:req.user._id},(err,doc)=>{
+            if(err){res.status(404).send()}
+            else{
+                if(bcrypt.compareSync(req.body.password, doc.password)){
+                    let hashpass= bcrypt.hashSync(req.body.newpassword, bcrypt.genSaltSync(10))
+                    doc.password = hashpass
+                    doc.save()
+                    res.status(201).send()
+                }else{res.status(401).send()}
             }
         })
     })
