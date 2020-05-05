@@ -1,7 +1,27 @@
-console.log(validate)
+document.querySelector('.inputimg').onchange = function(evt){
+    var tgt = evt.target || window.event.srcElement,
+        files = tgt.files;
+    // FileReader support
+    
+    if (FileReader && files && document.querySelector('.inputimg').files[0].size<=40000) {
+        var fr = new FileReader();
+        fr.onload = function () {
+            console.log(fr.result)
+            document.querySelector('img.fileimg').src = fr.result;
+        }
+        fr.readAsDataURL(files[0]);
+    }
+
+    // Not supported
+    else {
+        document.querySelector('.inputimg').value=''
+        alert('tamanho ultrapassado')
+    }
+}
 var f_topic='none'
 var lastselected = 'amigos'
-
+var lastoption = 'none'
+var new_pass = false
 function selected(is){
     if(this.id==undefined){var isto=is}
     else{var isto=this}
@@ -29,6 +49,13 @@ for(let i=0;i<19;i++){
     a.appendChild(label)
     document.querySelector('div.option.center-content').appendChild(a)
 }
+function reauth_fim(){
+    if(!user.icon){setTimeout(reauth_fim,50)
+    }else{
+        user_bar()
+        friends_all()
+    }
+}
 window.addEventListener('load', (event) => {
     var request=new XMLHttpRequest;
     request.open("GET","http://localhost:8082/conversa"),request.setRequestHeader("Content-Type","application/json"),request.send('{"username":"'+'username'+'","password": "'+'password'+'"}');
@@ -41,8 +68,8 @@ window.addEventListener('load', (event) => {
             document.querySelector('.menu.bottom.top').appendChild(chu)
         }
     }
-    user_bar()
-    friends_all()
+    reauth_fim()
+    
 });
 window.addEventListener('click',(event)=>{
     if(document.querySelector('.set-status').style.display!='none'){
@@ -53,7 +80,7 @@ let user_bar=()=>{
     let icon = document.querySelector('.option.bottom img')
     icon.src = 'data:image/jpeg;base64,' + user.icon;
     let status = document.querySelector('.option.bottom img.status')
-    status.src = ''
+    status.src = '../image/'+user.status +'.png'
     status.onmousemove= ()=>{
         if((status.offsetTop+12>event.clientY && status.offsetLeft+12>event.clientX)){status.style.cursor='pointer'
         }else{status.style.cursor='auto'}}
@@ -72,8 +99,169 @@ function user_status(){
     console.log('status')
     document.querySelector('.set-status').style.display = 'block'
 }
+function change_status(status){
+    reauth()
+    request = new XMLHttpRequest
+    request.open('POST',"http://localhost:8082/status")
+    request.setRequestHeader('Authorization', "Bearer " + user.token)
+    request.setRequestHeader('Content-Type','application/json')
+    request.send(`{"status":"${status}"}`)
+    request.onload =()=>{
+        document.querySelector('.set-status').style.display = 'none'
+        document.querySelector('.option.bottom img.status').src = '../image/'+status+'.png'
+        
+    }
+}
 function user_config(){
     document.querySelector('.user-config').style.display = 'flex'
+    myaccount()
+}
+function myaccount(){
+    if(lastoption != 'myaccout'){
+        document.querySelector('div.account').style.display = 'flex';
+        lastoption = 'myaccount';
+        document.querySelector('.account-user > img').src = 'data:image/jpeg;base64,' + user.icon;
+    }
+    user_edit()
+}
+
+function aviso(pai, message,color,time=2000){
+    if(color=='red'){color='255,66,66';console.log('red')}
+    else if(color=='green'){color='66,255,66';console.log('green')}
+    else{color = '120,120,120'}
+    let div = document.createElement('div')
+    div.style.height = '40px'
+    div.style.background = "rgba("+color+",0.5)"
+    div.style.borderRadius = '4px'
+    div.style.display = 'flex'
+    div.style.justifyContent = 'center'
+    div.style.alignItems = 'center'
+    let label = document.createElement('label')
+    label.innerText = message
+    label.style.font = 'bold 12pt Arial'
+    label.style.color = 'white'
+    div.appendChild(label)
+    pai.insertBefore(div,pai.childNodes[0])
+    console.log('created')
+    setTimeout(()=>{div.remove()}, time)
+}
+function user_edit(action=''){
+    if(action=='edit'){
+        document.querySelector('div.account-user.i').style.display = 'none'
+        document.querySelector('div.account-user.edit').style.display = 'flex'
+        document.querySelector('div.account-user.edit img').src = 'data:image/jpeg;base64,' + user.icon;
+        document.querySelector('div.account-user.edit input.username').value = user.username
+        if(!!user.email){document.querySelector('div.account-user.edit input.email').value = user.email}
+        document.querySelector('div.account-user.edit input.password').value = ''
+        console.log(new_pass)
+        if(new_pass){
+            document.querySelector('div.account-user.edit div  div.user-change label.lbl-newpassword').remove()
+            document.querySelector('div.account-user.edit div  div.user-change input.newpassword').remove()
+            let a = document.createElement('a')
+            a.innerText='Mudar senha?'
+            a.onclick=()=>{edit_password(); a.innerHTML=''}
+            document.querySelector('div.account-user.edit div  div.user-change').appendChild(a)
+            new_pass=false
+        }
+
+    }else{
+        if(action=='save'){
+            let username = document.querySelector('.user-change .username').value
+            let email = document.querySelector('.user-change .email').value
+            let password = document.querySelector('.user-change .password').value
+            let new_password = null
+            if(!!password){
+                if(password.indexOf(' ')==-1){
+                    if(username !=user.username){
+                        u_change = new XMLHttpRequest
+                        u_change.open('POST',"http://localhost:8082/change/username")
+                        u_change.setRequestHeader('Authorization', "Bearer " + user.token)
+                        u_change.setRequestHeader('Content-Type','application/json')
+                        u_change.send(`{"username":"${username}","password":"${password}"}`)
+                        u_change.onload =()=>{
+                            if(u_change.status==401){aviso(document.querySelector('.user-content'),'Senha Incorreta','red',3000);
+                            }else if(u_change.status==201){reauth();setTimeout(user_bar,400);aviso(document.querySelector('.user-content'),'Nome de Usuário alterado','green',4000)}
+                        }
+
+                    }if(user.icon!=document.querySelector('.inputimg').src){
+                        let fileimg= document.querySelector('.inputimg').files
+                        let boundary = (new Date()).getTime();
+                        let blobFile = fileimg[0];
+                        let formData = new FormData();
+                        formData.append("password", password);
+                        formData.append('file', fileimg[0], fileimg[0].name);
+                        i_change = new XMLHttpRequest
+                        i_change.open('POST',"http://localhost:8082/change/icon",true)
+                        i_change.setRequestHeader('Authorization', "Bearer " + user.token)
+                        i_change.setRequestHeader("data",formData)
+                        i_change.send(formData);
+                        i_change.onload=(e)=>{
+                            if(i_change.status==201){reauth();setTimeout(user_bar,200);setTimeout(myaccount,200);aviso(document.querySelector('.user-content'),'Icone alterado','green',5000)}
+                            else if(i_change.status==400){aviso(document.querySelector('.user-content'),'Nenhuma imagem enviada','red')}
+                            else if(i_change.status==401){aviso(document.querySelector('.user-content'),'Senha Incorreta','red')}
+                            else if(i_change.status==413){aviso(document.querySelector('.user-content'),'Tamanho passa do limite','red')}
+                        }
+                    }else if(new_password == null){aviso(document.querySelector('.user-content'),'Nada para mudar',' ')}
+
+                }else{aviso(document.querySelector('.user-content'),'Senha contém espaços','red')}
+            }else{aviso(document.querySelector('.user-content'),'Senha está vazia','red')}
+            if(!!document.querySelector('.user-change .newpassword')){
+                new_password = document.querySelector('.user-change .newpassword').value
+                if(!!new_password){
+                    if(new_password.indexOf(' ')==-1){
+                        if(password==new_password){aviso(document.querySelector('.user-content'),'Senha antiga e nova são idênticas','red',4000)
+                        }else{
+                            p_change = new XMLHttpRequest
+                            p_change.open('POST',"http://localhost:8082/change/password")
+                            p_change.setRequestHeader('Authorization', "Bearer " + user.token)
+                            p_change.setRequestHeader('Content-Type','application/json')
+                            p_change.send(`{"password":"${password}","newpassword": "${new_password}"}`)
+                            p_change.onload =()=>{
+                                console.log(p_change.status)
+                                if(p_change.status==401){aviso(document.querySelector('.user-content'),'Senha Incorreta','red',3000)
+                                }else{reauth();setTimeout(user_bar,200);setTimeout(myaccount,200);aviso(document.querySelector('.user-content'),'Senha alterada','green',5000)}
+                            }
+                        }
+                    }else{
+                        aviso(document.querySelector('.user-content'),'Nova Senha contém espaços','red')
+                    }
+                }else{
+                    aviso(document.querySelector('.user-content'),'Nova Senha está vazia','red')
+                }
+            }
+        }else if(action=='cancel'){
+        }
+        document.querySelector('div.account-user.edit').style.display = 'none'
+        document.querySelector('div.account-user.i').style.display = 'flex'
+        document.querySelector('div.account-user.i .username').innerText = user.username
+        if(!!user.email){document.querySelector('div.account-user.i .email').innerText = user.email
+        }else{document.querySelector('div.account-user.i .email').innerText ='Associe o e-mail!!!'}
+
+    }
+}
+function edit_password(){
+    document.querySelector('div.account-user.edit div  div.user-change a').innerHTML =''
+    let label = document.createElement('label')
+    label.className = 'lbl-newpassword'
+    label.innerText = 'NOVA SENHA'
+    let input = document.createElement('input')
+    input.type = 'text'
+    input.className = 'newpassword'
+
+    document.querySelector('div.account-user.edit div  div.user-change').appendChild(label)
+    document.querySelector('div.account-user.edit div  div.user-change').appendChild(input)
+    new_pass = true
+}
+
+function logout(){
+    request = new XMLHttpRequest
+    request.open('POST',"http://localhost:8082/logout")
+    request.setRequestHeader('Authorization', "Bearer " + user.token)
+    request.setRequestHeader('Content-Type','application/json')
+    request.send()
+    request.onload =()=>{
+        if(request.status=200){location.href = './login.html'}
+    }
 }
 function user_config_close(){
     document.querySelector('.user-config').style.display = 'none'
@@ -163,7 +351,6 @@ function friends_all(){
     request.send()
     request.onload= ()=>{
         let resp = JSON.parse(request.responseText)
-        console.log(resp)
         if(f_topic=='all'){}
         else{
             let message =document.querySelector('div.message')
@@ -264,13 +451,6 @@ function friends_all(){
                         exc.style.color = 'rgb(200,73,73)'
                         exc.innerText='Desfazer amizade'
                         exc.style.cursor = 'pointer'
-                        //exc.onclick=()=>{
-                        //    let excluir = new XMLHttpRequest
-                        //    excluir.open("POST", "http://localhost:8082"+"/friends")
-                        //    excluir.setRequestHeader('Authorization',"Bearer "+ user.token)
-                        //    excluir.send('resp.list[friend].id')
-                        //    excluir.onload= ()=>{}
-                        //}
                         exc.style.flex='1 1'
                         option.appendChild(exc)
                         body.appendChild(option)
@@ -388,7 +568,6 @@ function pedidos(){
         request.send()
         request.onload= ()=>{
             let resp = JSON.parse(request.responseText)
-            console.log(resp)
             let message =document.querySelector('div.message')
             message.innerHTML = ''
             let topic =document.createElement('label')
@@ -493,4 +672,7 @@ function pedidos(){
             }
         }
     }
+}
+function blocked(){
+    console.log(user.icon)
 }

@@ -19,10 +19,68 @@
     <div class="user-config">
         <div class='user-options'>
             <div class="options">
+                <label>CONFIGURAÇÕES DE USUÁRIO</label>
+                <button onclick="myaccount()">Minha conta</button>
+                <div></div>
+                <button class='out' onclick="logout()">Sair</button>
             </div>
         </div>
         <div class="user-content">
-
+            <div class='account'>
+                <label class='topic'>MINHA CONTA</label>
+                <div class='account-user i'>
+                    <img src="" alt=""/>
+                    <div class='account-user-info'>
+                        <div>
+                            <label>NOME DE USUÁRIO</label>
+                            <label class='username'>dd</label>
+                        </div>
+                        <div class='info e-mail'>
+                            <label>E-MAIL</label>
+                            <label class='email'>dd</label>
+                        </div>
+                    </div>
+                    <div>
+                        <button onclick="user_edit('edit')">Editar</button>
+                    </div>
+                </div>
+                <div class='account-user edit'>
+                    <div class='account-edit-info'>
+                        <div>
+                            <label for="img-upload"><img class="fileimg" src=""/></label>
+                            <input style="display:none" id="img-upload" class="inputimg" type="file" accept=".png,.jpg, .jpeg"/>
+                            <a href="">Remover</a>
+                        </div>
+                        <div class="user-change">
+                            <label>NOME DE USUÁRIO</label>
+                            <input type="text" class='username'></label>
+                            <label>E-MAIL</label>
+                            <input type="text" class='email'></label>
+                            <label>SENHA&nbsp&nbspATUAL</label>
+                            <input type="text" class='password'></label>
+                            <a onclick="edit_password()">Mudar senha?</a>
+                        </div>
+                    </div>
+                    <div class='btw'></div>
+                    <div class='user-edit-opt'>
+                        <div>
+                            <button>Excluir conta</button>
+                            <button>Desativar conta</button>
+                        </div>
+                        <div>
+                            <button class='cancel' onclick="user_edit('cancel')">Cancelar</button>
+                            <button class='save' onclick="user_edit('save')">Salvar</button>
+                        </div>
+                    </div>
+                </div>
+                <div class='account-sec'>
+                    <label class="topic">VERIFICAÇÃO DE DUAS ETAPAS</label>
+                    <div></div>
+                    <label>Proteja sua conta com uma camada extra de segurança. Uma vez configurada, serão necessários tanto a senha quanto um código de verificação de seu dispositivo móvel para entrar.</label>
+                    <div></div>
+                    <button>Ativar verificação de duas etapas</button>
+                </div>
+            </div>
         </div>
         <div class="user-close">
             <button onclick='user_config_close()'>
@@ -32,11 +90,11 @@
     </div>
     <div class='set-status'>
         <div>
-        <button class='no'><img src="../image/online.png" alt=""><label>Disponível</label></button>
+        <button class='no' onclick="change_status('online')"><img src="../image/online.png" alt=""><label>Disponível</label></button>
         <div class='div'></div>
-        <button class="no"><img src="../image/ausente.png" alt=""><label>Ausente</label></button>
-        <button class="yes"><img src="../image/ocupado.png" alt=""><label>Ocupado</label><div class="ce"><label class='min'>Você não irá mais receber notificações na área de trabalho</label></div></button>
-        <button class="yes"><img src="../image/invisivel.png" alt=""><label>Inivisível</label><div class="ce"><label class='min'>Você não aparece como disponível, mas terá acesso completo ao &lt;OMG-Tools&gt;</label></div></button>
+        <button class="no" onclick="change_status('away')"><img src="../image/away.png" alt=""><label>Ausente</label></button>
+        <button class="yes" onclick="change_status('busy')"><img src="../image/busy.png" alt=""><label>Ocupado</label><div class="ce"><label class='min'>Você não irá mais receber notificações na área de trabalho</label></div></button>
+        <button class="yes" onclick="change_status('offline')"><img src="../image/offline.png" alt=""><label>Inivisível</label><div class="ce"><label class='min'>Você não aparece como disponível, mas terá acesso completo ao &lt;OMG-Tools&gt;</label></div></button>
         <div class='div'></div>
         <button class='no'><img class='carinha' src="../image/carinha.png" alt=""><label class='p'>Definir status personalizado</label></button>
     </div>
@@ -60,8 +118,8 @@
         <div class="option center-content"><a id="amigos" class="option-selected" onclick="selected(this)"><img class="opt" src="../image/Amigos.png"><label>Amigos</label></a></div>
         </div>
         <div class="option bottom">
-            <img onclick='user_status()' alt="user_icon"/>
-            <img class='status'>
+            <img src='' onclick='user_status()' alt="user_icon"/>
+            <img src='' class='status'>
             <label></label>
             <div>
                 <button onclick="user_config()"><img/></button>

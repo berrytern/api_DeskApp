@@ -4,7 +4,7 @@ document.querySelector('.inputimg').onchange = function(evt){
         console.log(files.length, files.name,)
     // FileReader support
     
-    if (FileReader && files && document.querySelector('.inputimg').files[0].size<=30000) {
+    if (FileReader && files && document.querySelector('.inputimg').files[0].size<=40000) {
         var fr = new FileReader();
         fr.onload = function () {
             console.log(document.querySelector('.inputimg').value,document.querySelector('.inputimg').files[0])
