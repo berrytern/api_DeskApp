@@ -6,11 +6,11 @@ function reauth(){
     validate.open("POST",'http://localhost:8082'+'/validate')
     validate.setRequestHeader("Authorization","Bearer "+user.token)
     validate.send()
-    validate.onload=(e)=>{
+    validate.onload=()=>{
         if(validate.status == 401){location.href = './login.html'
         }else if(validate.status == 500){
             location.href = './login.html'
-        }else{
+        }else{  
             user.token = JSON.parse(validate.responseText).token
             user.username = JSON.parse(validate.responseText).username
             user.email = JSON.parse(validate.responseText).email

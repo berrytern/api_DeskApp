@@ -115,7 +115,10 @@
             <button class="opt-button" onclick="seach()">Encontre ou comece uma conversa</button>
         </div>
         <div class="option center">
-        <div class="option center-content"><a id="amigos" class="option-selected" onclick="selected(this)"><img class="opt" src="../image/Amigos.png"><label>Amigos</label></a></div>
+        <div class="option center-content">
+            <a id="amigos" class="option-selected" onclick="selected(this);friends.to()"><img class="opt-i" src="../image/Amigos.png"><label>Amigos</label></a>
+            <div class="option-cvs"></div>
+        </div>
         </div>
         <div class="option bottom">
             <img src='' onclick='user_status()' alt="user_icon"/>
@@ -129,21 +132,27 @@
     <div class="content">
         <div class="navbar">
             <div class="navl">
-                <a class='navl init'><img src="../image/Amigos.png" alt="amigos"/><label for="">Amigos</label></a>
-                <a class='navl n' onclick="friends()">Disponível</a>
-                <a class='navl n' onclick="friends_all()">Todos</a>
-                <a class='navl n' onclick="pedidos()">Pendentes</a>
-                <a class='navl n' onclick="blocked()">Bloqueados</a>
-                <a class='navl add' onclick="add()">Adicionar amigo</a>
+                <div class="navl-friends">
+                    <a class='navl init'><img src="../image/Amigos.png" alt="amigos"/><label for="">Amigos</label></a>
+                    <a class='navl n' onclick="friends.able()">Disponível</a>
+                    <a class='navl n' onclick="friends.all()">Todos</a>
+                    <a class='navl n' onclick="friends.pedidos()">Pendentes</a>
+                    <a class='navl n' onclick="friends.bloqued()">Bloqueados</a>
+                    <a class='navl add' onclick="friends.add()">Adicionar amigo</a>
+                </div>
+                <div class="navl-message"></div>
             </div>
-            <div class="navr"><button>right</button></div>
+            <div class="navr">
+                <div class="navr-friends"></div>
+                <div class="navr-message"></div>
+            </div>
             
         </div>
         <div class="somecounts">
             <div class="counts">
-                <div class="message">
-                    <label class="f lbl"></label>
-                    <a class="f area"></a>
+                <div class="message"><div class='message-content'></div>
+                </div>
+                <div class="send-message">
                 </div>
             </div>
             <div class="content hiddable">

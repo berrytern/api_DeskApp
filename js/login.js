@@ -27,6 +27,11 @@ function pass(showisit=false){
     }
 
 }
+document.getElementById("password").addEventListener('keydown',(e)=>{
+    if(e.key=="Enter"){
+        submit('/login')
+    }
+})
 function user(showisit=false){
     var user= document.getElementById("username")
     if(showisit==true && user.value==""){

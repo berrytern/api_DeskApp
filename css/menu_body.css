@@ -64,6 +64,9 @@ div.option{
     height: min-content;
     width: 230px;
 }
+.option.center-content a label{
+    margin-top: 10px;
+}
 a.option{
     display: flex;
     flex-direction: row;
@@ -83,17 +86,26 @@ a.option-selected{
     border-radius: 5px;
     margin-left: 9px;
 }
+div.option-cvs{
+    display: flex;
+    flex-direction: column;
+}
 a label, a  img{
     margin: 5px 5px;
     color: white;
 }
 img.opt{
-    margin-right: 10px;
-    width: 35px;
-    height: 35px;
+    margin: 7px 10px 7px 5px;
+    width: 31px;
+    height: 31px;
     border-radius: 30px;
 }
-img.opt ~ label{
+img.opt-i{
+    margin: 7px 10px 7px 5px;
+    width: 31px;
+    height: 31px;
+}
+img.opt ~ label,img.opt-i ~ label{
     font: normal 15pt Arial;
 }
 
@@ -256,6 +268,7 @@ div.account-user-info div{
 div.account-user-info div>label:first-child{
     color: rgb(170, 170, 170);
 }
+.fileimg:hover{cursor: pointer;}
 div.account-user.edit{
     display: flex;
     flex-direction: column;
@@ -483,8 +496,8 @@ div.account-sec div{
     flex-direction: row-reverse;
     width: 100%;
 }
-div.navl{
-    display: flex;
+div.navl-friends{
+    display: none;
     flex-direction: row;
     position: fixed;
     width: 100%;
@@ -539,6 +552,7 @@ a.navl.add{
     flex-grow: 1;
 }
 .message .f.lbl{
+    
     margin: 5px 0px 10px 5px;
 }
 .message .f.div{
@@ -578,10 +592,22 @@ a.navl.add{
 .message{
     display: flex;
     flex-direction: column;
+    overflow-y:auto;
     flex: 1 2;
-    height: 100%;
+    height: calc(calc(100vh - 64px - 48px) - 1.3em);
     width: 100%;
 }
+.message-content{
+    flex-direction: column;
+    overflow-y:auto;
+    
+}
+.send-message{
+    display: none;
+    height: 42px;
+    margin: 0px 15px 20px 15px;
+}
+
 @media(min-width: 1000px) and (min-height:1000px ){
     section{margin-top:1.4rem;height: calc(100vh - 1.5em);}
     .menu{height: calc(100%-24px);}
