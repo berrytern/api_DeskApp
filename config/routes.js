@@ -3,6 +3,8 @@ const Conta = require("../models/Conta")
 const Online = require('../models/Online')
 const Pedidos = require('../models/Pedidos')
 const Friends = require('../models/Friends')
+const Bloqued = require('../models/Bloqued')
+const Conversa = require('../models/Conversa')
 const {admin} = require('./admin')
 const {return_token} = require("./auth")
 const {auth} = require("./auth")
@@ -61,6 +63,10 @@ module.exports = app=>{
     app.use('/pedidos', auth())
     app.use('/pedido/new', auth())
     app.use('/pedido/delete', auth())
+    app.use('/conversas',auth())
+    app.use('/message',auth())
+    app.use('/conversa/new',auth())
+    app.use('/conversa/update',auth())
     app.use('/bloqueados', auth())
     app.use('/bloqueado/new', auth())
     app.use('/bloqueado/delete', auth())
@@ -85,7 +91,6 @@ module.exports = app=>{
             else{let timetk = user.exp -(Date.now()/1000)
                 if(timetk>=1){
                     Conta.findOne({_id: user._id}, (e,doc)=>{
-                        console.log('user._id',user, 'doc._id',doc)
                         if(e==null){
                             Online.findOne({id:doc._id},(e,resp)=>{
                                 if(e){res.status(500).send();console.log(e)}
@@ -153,6 +158,8 @@ module.exports = app=>{
             if(!!doc){
                 if(bcrypt.compareSync(password, doc.password)){
                     console.log('logado')
+                    doc.status = doc.laststatus
+                    doc.save()
                     Online.findOne({id:doc.id},(e,resp)=>{
                         if(e){res.status(500).send();console.log(e)}
                         else if(!resp){ 
@@ -176,6 +183,13 @@ module.exports = app=>{
     })
     app.post('/logout',(req,res)=>{
         console.log('/logout')
+        Conta.findOne({_id:req.user._id},(err,doc)=>{
+            if(err){res.status(500).send()}
+            else{
+                doc.status='offline'
+                doc.save()
+            }
+        })
         Online.findOneAndDelete({id:req.user._id},(err,doc)=>{
             console.log(err)
             if(!err){res.status(200).send('loggout')}
@@ -194,7 +208,7 @@ module.exports = app=>{
                         let fs = require('fs')
                         for(friend in doc.who){
                             user = await Conta.findOne({_id:doc.who[friend]},(err,info)=>{})
-                            lista.push({'id':user._id,'username':user.username, "icon": user.icon.toString('base64')})
+                            lista.push({'id':user._id,'username':user.username, "icon": user.icon.toString('base64'), "status":user.status})
                             
                         }
                         return lista
@@ -315,9 +329,78 @@ module.exports = app=>{
         remove_pedidos(req.user._id,req.body.to)
         res.status(200).send()
     })
-    app.post('/bloqueados',(req,res)=>{})
-    app.post('/bloqueado/new',(req,res)=>{})
-    app.post('/bloqueado/delete',(req,res)=>{})
+    app.get('/bloqueados',(req,res)=>{
+        console.log('/bloqueados')
+        Bloqued.findOne({id:req.user._id},(err,doc)=>{
+            let list=[]
+            let find=async ()=>{
+                for(i in doc.who){
+                    user = await Conta.findOne({_id:doc.who[i]})
+                    list.push({'id':user._id,'username':user.username, "icon": user.icon.toString('base64')})
+                }
+                res.status(200).send({'list':list})
+            }
+            if(!!doc){
+                find()
+            }else{res.status(404).send()}
+        })
+    })
+    app.post('/bloqueado/new',(req,res)=>{
+        console.log('/bloqueado/new')
+        const {to} = req.body
+        let already = false
+        if(!!to){
+            Conta.findOne({_id:to},(err,resp)=>{
+                if(!!resp){
+                    Bloqued.findOne({id:req.user._id},(err,doc)=>{
+                        if(!!doc){
+                            for(i in doc.who){
+                                console.log(doc.who[i], to,doc.who[i]==to)
+                                if(doc.who[i]==to){already = true}
+                            }
+                            if(already){
+                                res.status(409).send()
+                            }else{
+                                doc.who = doc.who.concat(to)
+                                doc.save()
+                                res.status(201).send()
+                            }
+                        }else{
+                            new Bloqued({
+                                id: req.user._id,
+                                who: req.body.to
+                            }).save()
+                            res.status(201).send()
+                        }
+                    })
+                }else{res.status(400).send()}
+            })
+            
+        }else{res.status(400).send('sem body')}
+    })
+    app.delete('/bloqueado/delete',(req,res)=>{
+        console.log('/bloqueado/delete')
+        const {to} = req.body
+        let already = true
+        if(!!to){
+            Bloqued.findOne({id:req.user._id},(err,doc)=>{
+                if(!!doc){
+                    for( var i = 0; i < doc.who.length; i++){
+                        if(doc.who[i] === to){
+                            already=false;
+                            console.log(doc.who.splice(i,1))
+                            doc.who.splice(i,1);
+                            doc.save()
+                        }
+                    }
+                    if(already){res.status(409).send()
+                    }else{
+                       res.status(200).send()
+                    }
+                }else{res.status(400).send()}
+            })
+        }
+    })
     app.post('/status',(req,res)=>{
         console.log('/status',req.body.status,req.user._id)
         let statuslist = ['online','offline', 'busy','away']
@@ -326,6 +409,7 @@ module.exports = app=>{
             if(err){res.status(500).json({'error':'server error'})}
             else{
                 if(statuslist.indexOf(req.body.status)!=-1){
+                    doc.laststatus = req.body.status
                     doc.status = req.body.status
                     doc.save() 
                     res.status(200).json({'done': req.body.status})
@@ -383,10 +467,204 @@ module.exports = app=>{
             }
         })
     })
-    app.get('/conversa',(req, res)=>{
-        console.log('/conversa')
+    app.get('/conversa/:id/:partir/:fim',(req,res)=>{
+        console.log('get /conversa/:id',req.params.id)
+        let geticon= async (doc)=>{
+            let listid = []
+            let listuser = []
+            let listicon = []
+            let id = req.params.id
+            let partir = req.params.partir
+            let fim = req.params.fim
+            let resp
+            if(id=='n'){id=undefined}
+            if(partir=='n'){partir=undefined}
+            if(fim=='n'){fim=undefined}
+            console.log(req.body,req.params)
+            if(typeof id!=='undefined'){
+                if(typeof partir==='undefined' && typeof fim==='undefined'){
+                    resp = doc.message.slice(-30)
+                }else if(typeof partir!=='undefined'&& typeof fim==='undefined'){
+                    resp = doc.message.slice(partir)
+                }else if(typeof partir!=='undefined'&& typeof fim!=='undefined'){
+                    resp = doc.message.slice(partir,fim)
+                }
+                if(resp.length>0){
+                    for(let msg in resp){
+                        if(listid.length>0){
+                            let already = false
+                            listid.find((id)=>{if(id==resp[msg].id){already=true;return true}})
+                            if(already==false){
+                                let user
+                                user = await Conta.findOne({_id:resp[msg].id})
+                                listid.push(resp[msg].id)
+                                listuser.push(user.username)
+                                listicon.push(user.icon.toString('base64'))
+                            }
+                        
+                        }else{
+                            user = await Conta.findOne({_id:resp[msg].id})
+                            listid.push(resp[msg].id)
+                            listuser.push(user.username)
+                            listicon.push(user.icon.toString('base64'))
+                        }
+                    }
+                    res.send([resp,[listid,listuser,listicon]])
+                }else{res.status(204).send()}
+            }else{res.status(400).send()}
+        }
+        Conversa.findOne({_id:req.params.id},(err,doc)=>{
+            geticon(doc)
+        })
+    })
+    app.post('/message/:id',(req,res)=>{
+        console.log('post /conversa/:id')
+        console.log(req.body.message, req.body.type)
+        Conversa.findOne({_id:req.params.id},(err,doc)=>{
+            if(doc.between.indexOf(req.user._id)!=-1){
+                doc.message = doc.message.concat({'id':req.user._id,'type':req.body.type,'message':req.body.message,'time':Date.now(),'num':doc.message.length})
+                doc.save()
+                res.status(201).json({'id':req.user._id,'type':req.body.type,'message':req.body.message,'time':Date.now(),'num':doc.message.length})
+            }else{res.status(401).send()}
+        })
+    })
+    app.get('/conversas',(req, res)=>{
+        console.log('/conversas')
+        let listcon =[]
+        let list
+        let find=async(conversa)=>{
+            let lista = await conversa.between.map(async(id)=>{
+                if(id!=req.user._id){
+                    if(!conversa.group){
+                        user = await Conta.findOne({_id:id})
+                        return {'_id':conversa._id,"username":user.username,"icon": user.icon.toString('base64'),'status':user.status,'group':conversa.group}//{"username":user.username,"icon":user.icon.toString('base64')}
+                    }else{
+                        user = await Conta.findOne({_id:id})
+                        return user.username
+                    }
+                }
+            }   )
+            return Promise.all(lista).then((result)=>{return result.filter((isso)=>isso)})
+            /*
+            for(id in doc[conversa].between){
+                if(doc[conversa].between[id]!=req.user._id){
+                    if(!doc[conversa].group){
+                    user = await Conta.findOne({_id:doc[conversa].between[id]})
+                    list.push({"username":user.username,"icon":user.icon.toString('base64')})
+                    }else{
+                        user = await Conta.findOne({_id:doc[conversa].between[id]})
+                        list.push({"username":user.username})
+                    }
+                }
+                
+            }*/
+            
+        }
+        let sendcon=async(doc)=>{
+            const isso =doc.map(async(conversa)=>{
+                if(!conversa.group){
+                    return await find(conversa).then(li=>{
+                        return li[0]
+                        
+                    })
+                }else{
+                    return await find(conversa).then(li=>{
+                        return {'_id':conversa._id,"username":li.filter((isso)=>isso),'group':conversa.group}
+                    })
+                }
+            })
+            return Promise.all(isso).then((m)=>{res.status(200).send({"list":m});console.log('sended')})
+            
+            
+        }
+        Conversa.find({between:req.user._id},(err,doc)=>{
+            if(err){
+            }else if(doc.length==0){res.status(404).send()
+            }else{
+                sendcon(doc)
+            }
+        })
+        
+    })
+    app.post('/conversa/new',(req, res)=>{
+        console.log('/conversa/new')
+        let exist = true
+        let missing = false
+        let find = async(res,all)=>{
+            for(id in req.body.to){
+                result = await Conta.findOne({_id:req.body.to[id]},(e,resp)=>{
+                })
+                if(!result){console.log('tofalse');exist = false;break}
+            }
+            if(exist){
+                console.log('create')
+                new Conversa({
+                    between: all,
+                    group: true
+                }).save()
+                res.status(201).send()
+            }else{res.status(404).send()}
+        }
+        try{req.body.group;req.body.to;console.log(req.body.group,req.body.to)}
+        catch(e){missing = true}
+        if(!missing){
+            if(req.body.to.indexOf(req.user._id)==-1){
+                let all = [...req.body.to]
+                console.log(req.body.to,all)
+                all.push(req.user._id)
+                if(req.body.group){
+                    Conversa.findOne({group:true,between:all},(err,doc)=>{
+                        console.log(err, doc)
+                        if(!!doc){
+                            res.status(409).send()
+                        }
+                        else{
+                            find(res,all)
+                        }
+                    })
+                }else{
+                    if(all.length==2){
+                        console.log("group = false, length = 2",all,req.body.to)
+                        Conversa.findOne({$and:([{group:false},{$or:([{between: all},{between:Array.from(all).reverse()}])}])},(err,doc)=>{
+                            if(!!doc){
+                                let find=async(status)=>{
+                                    user =  await Conta.findOne({_id:req.body.to})
+                                    res.status(status).json({'obj':{'_id':doc._id,'between':doc.between,'username':user.username,'icon':user.icon.toString('base64'),'status':user.status}})
+                                }
+                                find(409)
+                            }
+                            else{
+                                Conta.findOne({_id:req.body.to},(e,resp)=>{
+                                    if(!resp){
+                                        res.status(404).send()
+                                    }
+                                    else{
+                                        new Conversa({
+                                            between: all,
+                                            group: false
+                                        }).save()
+                                        let find=async(status)=>{
+                                            user =  await Conta.findOne({_id:req.body.to})
+                                            con = await Conversa.findOne({group:false,between:all})
+                                            res.status(201).json({'obj':{'_id':con._id,'between':all,'username':user.username,'icon':user.icon.toString('base64'),'status':user.status}})
+                                        }
+                                        find()
+                                        
+                                    }
+                                })
+                            }
+                        })
+                    }else{res.status(400).json({'error': "need 2 peoples to create a conversation"})}
+                }
+            }
+        }else{
+            res.status(400).json({'error': "missing args"})
+        }
+    })
+    app.put('/conversa/update',(req, res)=>{
+        console.log('/conversa/update')
         res.json({'conversas':'nada'})})
-    app.post('/admin/users',async (req,res)=>{
+app.post('/admin/users',async (req,res)=>{
         await Conta.find({}, (err, user)=>{
             if(err){console.log(err)}
             else{

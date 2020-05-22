@@ -23,7 +23,11 @@ const Conta = new Schema ({
     status:{
         type: String,
         default: 'offline'
-    }
+    },
+    laststatus:{
+        type: String,
+        default: 'online'
+    },
 })
 
 module.exports =mongoose.model('contas', Conta)
