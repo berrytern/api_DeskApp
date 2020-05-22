@@ -22,6 +22,8 @@ function reauth(){
                 location.href="./login.html"}
             else{
                 localStorage.setItem('token', user.token)
+                if(typeof uptkskt!=='undefined'){uptkskt()
+                }else{}
             }
         }
     }

@@ -172,7 +172,6 @@ function Conversas(){
             }else if(request.status==200){
                 
                 let list = JSON.parse(request.responseText)['list']
-                console.log(request.responseText)
                 let time = Date.now()
                 
                 for(let conversa in list){
